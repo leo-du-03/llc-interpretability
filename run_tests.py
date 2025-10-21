@@ -46,5 +46,29 @@ def palindromesTests():
             truth.append(wordreverse[i] == wordreverse[i + len(line_list)])
         assert(out.decoded == truth)
 
+from peak import get_peak_model
+from test_datasets.test_peak import get_peak_test_cases
+def peakTests():
+    test_cases = get_peak_test_cases()
+    bos = "BOS"
+    model = get_peak_model()
+
+    for i, (input_seq, expected_output) in enumerate(test_cases, 1):
+        out = model.apply(input_seq)
+        decoded = out.decoded
+
+        assert decoded == expected_output, (
+            # f"\n--- Test Case {i} Failed ---\n"
+            # f"Input:    {input_seq}\n"
+            # f"Expected: {expected_output}\n"
+            # f"Got:      {decoded}\n"
+        )
+        # print(f"--- Test Case {i} ---")
+        # print(f"Input:    {input_seq}")
+        # print(f"Expected: {expected_output}")
+        # print(f"Output:   {decoded}")
+        # print("Passed!\n")
+
 if __name__ == "__main__":
     palindromesTests()
+    peakTests()
