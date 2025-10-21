@@ -257,3 +257,16 @@ def apply(model, x):
     with torch.no_grad():
         y = model(x)
     return y
+
+"""
+Checks if the outputs of a Tracr-compiled Haiku transformer and a TracrTransformer are equal.
+
+Args:
+    hk_output: the transformer output of the Haiku model (e.g. model.apply(x).transformer_output)
+    torch_output: the output of the TracrTransformer
+
+Returns:
+    True if their tensor representations are equal, otherwise False.
+"""
+def outputs_equal(hk_output, torch_output):
+    return torch.equal(torch.tensor(np.array(hk_output)), torch_output)
