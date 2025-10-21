@@ -127,7 +127,7 @@ Returns:
 def infer_transformer_hparams(hk_params):    
     # Get all layer names 
     layer_nums = set()
-        for k in hk_params.keys():
+    for k in hk_params.keys():
         m = re.match(r"transformer/layer_(\d+)/", k)
         if m:
             layer_nums.add(int(m.group(1)))
