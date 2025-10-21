@@ -71,8 +71,8 @@ class TracrTransformer(nn.Module):
 
     def forward(self, x):
         # x: (batch, seq)
-        x = torch.tensor(self.model.apply(x).input_embeddings)
-        print(x.shape, x)
+        x = torch.tensor(self.model.apply(x).input_embeddings, dtype=torch.float64)
+        # print(x.shape, x)
         for layer in self.layers:
             x = layer(x)
         return x
@@ -106,7 +106,7 @@ Returns:
     A nested dictionary of torch tensors.
 """
 def haiku_params_to_torch(params):
-    return jax.tree_util.tree_map(lambda x: torch.tensor(np.array(x)), params)
+    return jax.tree_util.tree_map(lambda x: torch.tensor(np.array(x), dtype=torch.float64), params)
 
 """
 Infers the hyperparameters of a Tracr-compiled transformer in Haiku given its parameters as torch tensors.
@@ -127,7 +127,7 @@ Returns:
 def infer_transformer_hparams(hk_params):    
     # Get all layer names 
     layer_nums = set()
-        for k in hk_params.keys():
+    for k in hk_params.keys():
         m = re.match(r"transformer/layer_(\d+)/", k)
         if m:
             layer_nums.add(int(m.group(1)))
@@ -260,6 +260,7 @@ def apply(model, x):
 
 """
 Checks if the outputs of a Tracr-compiled Haiku transformer and a TracrTransformer are equal.
+Due to rounding errors in the JAX -> PyTorch transfer, we accept a degree of tolerance of 1e-05 in their outputs
 
 Args:
     hk_output: the transformer output of the Haiku model (e.g. model.apply(x).transformer_output)
@@ -269,4 +270,4 @@ Returns:
     True if their tensor representations are equal, otherwise False.
 """
 def outputs_equal(hk_output, torch_output):
-    return torch.equal(torch.tensor(np.array(hk_output)), torch_output)
+    return torch.allclose(torch.tensor(np.array(hk_output), dtype=torch.float64), torch_output, atol=1e-05)
