@@ -6,7 +6,7 @@ class SequenceDataset(Dataset):
     def __init__(self, sequences):
         '''
         sequences should be a list of input, output should be the true output value
-        Example: [([BOS, 1, 2, 3], [BOS, 3, 2, 1]), ([BOS, 3, 1, 2], [BOS, 2, 1, 3])]
+        should be raw outputs, not decoded, of shape (1, SEQ_LEN, OUT_DIM)
         '''
         self.sequences = sequences
 
