@@ -1,4 +1,5 @@
 import random
+from palindrome import check_palindrome
 
 def generate_palindromes(n):
     palindromes = []
@@ -29,35 +30,33 @@ def generate_non_palindromes(n):
 def generate_all_palindrome_testcases():
     all_cases = []
     bos = "BOS"
+    model = check_palindrome()
+
     with open("test_datasets/palindromes.txt") as file:
         lines = [line.rstrip() for line in file]
     for line in lines:
         word = [bos] + list(line)
-        all_cases.append((word, [bos] + [True] * len(list(line))))
+        out = model.apply(word)
+        all_cases.append((word, out.transformer_output))
 
     rand_pals = generate_palindromes(50)
     for line in rand_pals:
         word = [bos] + list(line)
-        all_cases.append((word, [bos] + [True] * len(list(line))))
+        out = model.apply(word)
+        all_cases.append((word, out.transformer_output))
 
     with open("test_datasets/non_palindromes.txt") as file:
         lines = [line.rstrip() for line in file]
     for line in lines:
         line_list = list(line)
         word = [bos] + line_list
-        truth = [bos]
-        wordreverse = line_list + line_list[::-1]
-        for i in range(0, len(line_list)):
-            truth.append(wordreverse[i] == wordreverse[i + len(line_list)])
-        all_cases.append((word, truth))
+        out = model.apply(word)
+        all_cases.append((word, out.transformer_output))
 
     rand_non_pals = generate_non_palindromes(50)
     for line in rand_non_pals:
         line_list = list(line)
         word = [bos] + line_list
-        truth = [bos]
-        wordreverse = line_list + line_list[::-1]
-        for i in range(0, len(line_list)):
-            truth.append(wordreverse[i] == wordreverse[i + len(line_list)])
-        all_cases.append((word, truth))
+        out = model.apply(word)
+        all_cases.append((word, out.transformer_output))
     return all_cases

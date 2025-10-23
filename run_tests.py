@@ -53,6 +53,6 @@ def palindromesTests():
         pytorch_out = apply(torch_model, word)
         assert(outputs_equal(out.transformer_output, pytorch_out))
         assert(out.decoded == truth)
-    
+
 if __name__ == "__main__":
     palindromesTests()
