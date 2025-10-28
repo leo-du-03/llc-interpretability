@@ -17,8 +17,11 @@ class SequenceDataset(Dataset):
         input, truth = self.sequences[idx]
         return input, truth
     
+def identityCollator(batch):
+    return batch
+    
 def getSequenceDataLoader(sequences):
-    return DataLoader(SequenceDataset(sequences=sequences), shuffle=True)
+    return DataLoader(SequenceDataset(sequences=sequences), batch_size=1, collate_fn=identityCollator, shuffle=True)
 
 def makePalindromeDataLoader():
     data = generate_all_palindrome_testcases()
