@@ -25,8 +25,14 @@ class SequenceDataset(Dataset):
         input, truth = self.sequences[idx]
         return input, truth
     
+def identityCollator(batch):
+    return batch
+    
 def getSequenceDataLoader(sequences):
     return DataLoader(SequenceDataset(sequences=sequences), collate_fn=tensor_collate, shuffle=True)
+
+    #return DataLoader(SequenceDataset(sequences=sequences), batch_size=1, collate_fn=identityCollator, shuffle=True)
+
 
 def makePalindromeDataLoader():
     data = generate_all_palindrome_testcases()
@@ -62,5 +68,5 @@ def tensor_collate(batch):
 
 
 if __name__ == "__main__":
-    #makePalindromeDataLoader()
+    makePalindromeDataLoader()
     makePeakDataLoader()
