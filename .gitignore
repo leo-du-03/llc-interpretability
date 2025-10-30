@@ -1,3 +1,7 @@
 build/
 *.egg-info/
+venv/
+llc/
+*.pyc
 __pycache__/
+.ipynb_checkpoints/
