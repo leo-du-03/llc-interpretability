@@ -29,9 +29,9 @@ def identityCollator(batch):
     return batch
     
 def getSequenceDataLoader(sequences):
-    return DataLoader(SequenceDataset(sequences=sequences), collate_fn=tensor_collate, shuffle=True)
+    # return DataLoader(SequenceDataset(sequences=sequences), collate_fn=tensor_collate, shuffle=True)
 
-    #return DataLoader(SequenceDataset(sequences=sequences), batch_size=1, collate_fn=identityCollator, shuffle=True)
+    return DataLoader(SequenceDataset(sequences=sequences), batch_size=1, collate_fn=identityCollator, shuffle=True)
 
 
 def makePalindromeDataLoader():
