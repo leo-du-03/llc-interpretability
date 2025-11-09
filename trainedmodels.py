@@ -3,8 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch import optim
 import numpy as np
-import jax
-import jax.numpy as jnp
 
 from tracr.haiku_to_pytorch import *
 
@@ -63,16 +61,16 @@ class Block(nn.Module):
 
 """PyTorch transformer architecture"""
 class Transformer(nn.Module):
-    def __init__(self, model, d_model, num_layers, num_heads, num_ff_layers, d_ff, d_k, d_v):
+    def __init__(self, tracr_model, d_model, num_layers, num_heads, num_ff_layers, d_ff, d_k, d_v):
         super().__init__()
-        self.model = model
+        self.tracr_model = tracr_model
         self.layers = nn.ModuleList([
             Block(d_model, num_heads, num_ff_layers, d_ff, d_k, d_v) for _ in range(num_layers)
         ])
 
     def forward(self, x):
         # x: (batch, seq)
-        x = torch.tensor(self.model.apply(x).input_embeddings, dtype=torch.float64)
+        x = torch.tensor(self.tracr_model.apply(x).input_embeddings, dtype=torch.float32)
         # print(x.shape, x)
         for layer in self.layers:
             x = layer(x)
@@ -96,10 +94,8 @@ Returns:
     A Transformer trained using Adam on the provided dataloader.
 """
 def train_model(dataloader, assembled_model, epochs, hparam_dict = dict(num_layers = -1, num_heads = -1, num_ff_layers = -1, d_ff = -1, d_k = -1, d_v = -1)):
-    print("STARTING")
     hk_params = haiku_params_to_torch(assembled_model.params)
     hparams = infer_transformer_hparams(hk_params)
-    print("INFERRED HYPERPARAMETERS")
 
     num_layers = hparams['n_layers'] if hparam_dict['num_layers'] == -1 else hparam_dict['num_layers']
     num_heads = hparams['n_heads'] if hparam_dict['num_heads'] == -1 else hparam_dict['num_heads']
@@ -108,20 +104,19 @@ def train_model(dataloader, assembled_model, epochs, hparam_dict = dict(num_laye
     d_k = hparams['d_k'] if hparam_dict['d_k'] == -1 else hparam_dict['d_k']
     d_v = hparams['d_v'] if hparam_dict['d_v'] == -1 else hparam_dict['d_v']
 
-    print(num_layers, num_heads, num_ff_layers, d_ff, d_k, d_v)
-
-    model = Transformer(model = assembled_model, d_model = hparams['d_model'], num_layers = num_layers, num_heads = num_heads, num_ff_layers = num_ff_layers, d_ff = d_ff, d_k = d_k, d_v = d_v)
+    model = Transformer(tracr_model = assembled_model, d_model = hparams['d_model'], num_layers = num_layers, num_heads = num_heads, num_ff_layers = num_ff_layers, d_ff = d_ff, d_k = d_k, d_v = d_v)
     criterion = nn.CrossEntropyLoss()
-    for param in model.parameters():
-        print(type(param), param.size)
     optimizer = optim.Adam(model.parameters(), lr=0.0001, betas=(0.9,0.98), eps=1e-9)
 
-    model.train()  
+    model.train()
+
     for epoch in range(epochs):
-        for x, y in dataloader:
+        for example in dataloader:
+            x = example[0][0]
+            y = example[0][1]
             optimizer.zero_grad()
             logits = model(x)
-            loss = criterion(logits.view(-1, logits.size(-1)), y.view(-1))
+            loss = criterion(logits, y)
             loss.backward()
             optimizer.step()
         print(f"Epoch {epoch + 1}: loss = {loss.item():.4f}")
