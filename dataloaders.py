@@ -2,6 +2,8 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from test_datasets.generate_tests import generate_all_palindrome_testcases
 from test_datasets.test_peak import get_peak_test_cases
+from test_datasets.test_reverse import generate_all_reverse_testcases
+from test_datasets.test_repeated_token import generate_all_repeated_token_testcases
 
 VOCAB = ['BOS'] + list("abcdefghijklmnopqrstuvwxyz")  # include all chars you expect
 CHAR2IDX = {ch: i for i, ch in enumerate(VOCAB)}
@@ -29,9 +31,9 @@ def identityCollator(batch):
     return batch
     
 def getSequenceDataLoader(sequences):
-    return DataLoader(SequenceDataset(sequences=sequences), collate_fn=tensor_collate, shuffle=True)
+    # return DataLoader(SequenceDataset(sequences=sequences), collate_fn=tensor_collate, shuffle=True)
 
-    #return DataLoader(SequenceDataset(sequences=sequences), batch_size=1, collate_fn=identityCollator, shuffle=True)
+    return DataLoader(SequenceDataset(sequences=sequences), batch_size=1, collate_fn=identityCollator, shuffle=True)
 
 
 def makePalindromeDataLoader():
@@ -40,6 +42,14 @@ def makePalindromeDataLoader():
 
 def makePeakDataLoader():
     data = get_peak_test_cases()
+    return getSequenceDataLoader(data)
+
+def makeReverseDataLoader():
+    data = generate_all_reverse_testcases()
+    return getSequenceDataLoader(data)
+
+def makeRepeatedTokenDataLoader():
+    data = generate_all_repeated_token_testcases()
     return getSequenceDataLoader(data)
     
 def tensor_collate(batch):
@@ -70,3 +80,5 @@ def tensor_collate(batch):
 if __name__ == "__main__":
     makePalindromeDataLoader()
     makePeakDataLoader()
+    makeReverseDataLoader()
+    makeRepeatedTokenDataLoader()
