@@ -3,6 +3,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch import optim
 import numpy as np
+import copy
+
+from devinterp.optim import SGLD
+from devinterp.slt.sampler import estimate_learning_coeff_with_summary
+from devinterp.utils import plot_trace, default_nbeta
 
 from tracr.haiku_to_pytorch import *
 
@@ -76,6 +81,21 @@ class Transformer(nn.Module):
             x = layer(x)
         return x
 
+def evaluate(model, data):
+    inputs, outputs = data[0]
+
+    model_output = model.forward(inputs)
+
+    if torch.isnan(sum(sum(sum(model_output)))):
+        print(inputs)
+        print(outputs)
+        print(model_output)
+
+    loss = F.cross_entropy(model_output, outputs)
+    return loss, {
+        "logits": model_output
+    }
+
 """
 Trains a model with the given hyperparameters.
 
@@ -106,11 +126,12 @@ def train_model(dataloader, assembled_model, epochs, hparam_dict = dict(num_laye
 
     model = Transformer(tracr_model = assembled_model, d_model = hparams['d_model'], num_layers = num_layers, num_heads = num_heads, num_ff_layers = num_ff_layers, d_ff = d_ff, d_k = d_k, d_v = d_v)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.0001, betas=(0.9,0.98), eps=1e-9)
+    optimizer = optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5, betas=(0.9,0.98), eps=1e-9)
 
     model.train()
 
     for epoch in range(epochs):
+        running_loss = 0.0
         for example in dataloader:
             x = example[0][0]
             y = example[0][1]
@@ -119,7 +140,25 @@ def train_model(dataloader, assembled_model, epochs, hparam_dict = dict(num_laye
             loss = criterion(logits, y)
             loss.backward()
             optimizer.step()
-        print(f"Epoch {epoch + 1}: loss = {loss.item():.4f}")
+            running_loss += loss.item()
+        running_loss /= len(dataloader)
+        print(f"Epoch {epoch + 1}: loss = {running_loss:.4f}")
+
+        learning_coeff_stats = estimate_learning_coeff_with_summary(
+            copy.deepcopy(model),
+            loader=dataloader,
+            evaluate=evaluate,
+            sampling_method=SGLD,
+            optimizer_kwargs=dict(lr=1e-5, localization=1.0, nbeta=default_nbeta(dataloader)),
+            num_chains=4,  # How many independent chains to run
+            num_draws=100,  # How many samples to draw per chain
+            num_burnin_steps=0,  # How many samples to discard at the beginning of each chain
+            num_steps_bw_draws=1,  # How many steps to take between each sample
+            device='cpu',
+            online=True,
+        )
+        trace = learning_coeff_stats["loss/trace"]
+        print(round(sum(learning_coeff_stats['llc/means'])/len(learning_coeff_stats['llc/means']), 2))
     
     model.eval()
     
