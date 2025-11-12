@@ -20,7 +20,7 @@ def check_palindrome():
     model = compiling.compile_rasp_to_model(
         program=is_palindrome(rasp.tokens),
         vocab={"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", " "},
-        max_seq_len=50,
+        max_seq_len=10,
         compiler_bos=bos,
     )
 

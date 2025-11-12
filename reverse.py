@@ -26,8 +26,8 @@ def check_reverse():
     bos = "BOS"
     model = compiling.compile_rasp_to_model(
         program=reverse_sequence(rasp.tokens),
-        vocab={"a", "b", "c", "d", "e"},
-        max_seq_len=50,
+        vocab={"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", " "},
+        max_seq_len=10,
         compiler_bos=bos,
     )
 

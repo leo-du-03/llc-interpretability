@@ -31,7 +31,7 @@ def check_repeated_token():
     model = compiling.compile_rasp_to_model(
         program=detect_repeated_tokens(rasp.tokens),
         vocab={"a", "b", "c", "d", "e"},
-        max_seq_len=10,
+        max_seq_len=50,
         compiler_bos=bos,
     )
 

@@ -2,7 +2,7 @@ import random
 from reverse import check_reverse
 from itertools import product
 
-def generate_random_sequences(n, vocab=['a', 'b', 'c', 'd', 'e'], min_len=1, max_len=6):
+def generate_random_sequences(n, vocab=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', ' '], min_len=1, max_len=6):
     """Generate n random sequences from the given vocab."""
     sequences = []
     for _ in range(n):
@@ -17,10 +17,10 @@ def generate_all_reverse_testcases():
     bos = "BOS"
     model = check_reverse()
 
-    vocab = ['a', 'b', 'c', 'd', 'e']
+    vocab = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', ' ']
 
-    # Generate all sequences up to length 3 for comprehensive testing
-    for length in range(1, 4):
+    # Generate all sequences up to length 2 for comprehensive testing (more manageable)
+    for length in range(1, 3):
         for seq_tuple in product(vocab, repeat=length):
             seq = ''.join(seq_tuple)
             word = [bos] + list(seq)
@@ -28,7 +28,7 @@ def generate_all_reverse_testcases():
             all_cases.append((word, out.transformer_output))
 
     # Generate random sequences of varying lengths
-    random_seqs = generate_random_sequences(100, vocab=vocab, min_len=4, max_len=8)
+    random_seqs = generate_random_sequences(200, vocab=vocab, min_len=3, max_len=6)
     for seq in random_seqs:
         word = [bos] + list(seq)
         out = model.apply(word)
