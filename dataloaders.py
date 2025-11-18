@@ -34,8 +34,8 @@ def getSequenceDataLoader(sequences):
     return DataLoader(SequenceDataset(sequences=sequences), batch_size=1, collate_fn=identityCollator, shuffle=True)
 
 
-def makePalindromeDataLoader():
-    data = generate_all_palindrome_testcases()
+def makePalindromeDataLoader(num_palin):
+    data = generate_all_palindrome_testcases(num_palin)
     return getSequenceDataLoader(data)
 
 def makePeakDataLoader():
