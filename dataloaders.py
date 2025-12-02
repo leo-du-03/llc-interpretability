@@ -2,6 +2,8 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from test_datasets.generate_tests import generate_all_palindrome_testcases
 from test_datasets.test_peak import get_peak_test_cases
+from test_datasets.fractok_tests import generate_all_prev_fraction_tokens_x_testcases
+from test_datasets.fractok_tests import generate_fractok_training_data
 
 VOCAB = ['BOS'] + list("abcdefghijklmnopqrstuvwxyz")  # include all chars you expect
 CHAR2IDX = {ch: i for i, ch in enumerate(VOCAB)}
@@ -41,6 +43,11 @@ def makePalindromeDataLoader(num_palin):
 def makePeakDataLoader():
     data = get_peak_test_cases()
     return getSequenceDataLoader(data)
+
+def makeFractokDataLoader(max_seq_len=10, vocab_size='medium'):
+    # Placeholder: Replace with actual fractok data generation
+    data = generate_all_prev_fraction_tokens_x_testcases(max_seq_len=max_seq_len, vocab_size=vocab_size)  # Should be list of (input, truth) pairs
+    return getSequenceDataLoader(data)
     
 def tensor_collate(batch):
     inputs, targets = zip(*batch)
@@ -66,7 +73,26 @@ def tensor_collate(batch):
     targets = torch.tensor(processed_targets, dtype=torch.float)
     return inputs, targets
 
+def makeFractokTrainDataLoader(max_seq_len=10, vocab_size='medium', batch_size=32):
+    # Use the NEW function for training
+    data = generate_fractok_training_data(n=1000, max_seq_len=max_seq_len, vocab_size=vocab_size)
+    
+    def collate_for_training(batch):
+        inputs_list, targets_list = [], []
+        
+        for inputs, targets in batch:
+            input_ids = torch.tensor([CHAR2IDX.get(token, 0) for token in inputs], dtype=torch.long)
+            inputs_list.append(input_ids)
+            targets_list.append(targets.float())
+        
+        inputs_padded = torch.nn.utils.rnn.pad_sequence(inputs_list, batch_first=True, padding_value=0)
+        targets_padded = torch.nn.utils.rnn.pad_sequence(targets_list, batch_first=True, padding_value=0.0)
+        
+        return inputs_padded, targets_padded
+    
+    return DataLoader(SequenceDataset(sequences=data), batch_size=batch_size, collate_fn=collate_for_training, shuffle=True)
 
 if __name__ == "__main__":
     makePalindromeDataLoader()
     makePeakDataLoader()
+    makeFractokDataLoader()
