@@ -29,18 +29,18 @@ def generate_non_palindromes(n):
             non_palindromes.append(word)
     return non_palindromes
 
-def generate_all_palindrome_testcases():
+def generate_all_palindrome_testcases(num_palin):
     all_cases = []
     bos = "BOS"
     model = check_palindrome()
 
-    rand_pals = generate_palindromes(50)
+    rand_pals = generate_palindromes(num_palin)
     for line in rand_pals:
         word = [bos] + list(line)
         out = model.apply(word)
         all_cases.append((word, torch.tensor(np.array(out.transformer_output), dtype=torch.float64)))
 
-    rand_non_pals = generate_non_palindromes(50)
+    rand_non_pals = generate_non_palindromes(num_palin)
     for line in rand_non_pals:
         line_list = list(line)
         word = [bos] + line_list
