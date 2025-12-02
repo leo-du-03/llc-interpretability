@@ -43,6 +43,54 @@ except:
 # Create test loader
 test_loader = makeFractokDataLoader(max_seq_len=10, vocab_size='medium')
 
+
+print("\n=== Checking Test Loss ===")
+model.eval()
+test_losses = []
+with torch.no_grad():
+    for i, batch in enumerate(test_loader):
+        inputs, outputs = batch[0]
+        
+        # Tokenize inputs
+        input_ids = torch.tensor(
+            [CHAR2IDX.get(token, 0) for token in inputs], 
+            dtype=torch.long
+        ).unsqueeze(0).to(DEVICE)
+        
+        # Compute ground truth
+        fractok_values = []
+        for j in range(len(inputs)):
+            if j == 0:  # BOS
+                fractok_values.append(0.0)
+            else:
+                num_x = sum(1 for t in inputs[1:j+1] if t == 'x')
+                fractok_values.append(num_x / j)
+        targets = torch.tensor(fractok_values, dtype=torch.float32).unsqueeze(0).to(DEVICE)
+        
+        # Forward pass
+        model_output = model.forward(input_ids)
+        
+        # Calculate loss (with and without scaling)
+        raw_loss = F.mse_loss(model_output, targets)
+        scaled_loss = raw_loss * 1000
+        
+        test_losses.append(raw_loss.item())
+        
+        if i == 0:  # Print first batch details
+            print(f"\nFirst batch example:")
+            print(f"  Input: {inputs}")
+            print(f"  Targets: {targets.cpu().numpy()}")
+            print(f"  Predictions: {model_output.cpu().numpy()}")
+            print(f"  Raw loss: {raw_loss.item():.6f}")
+            print(f"  Scaled loss (1000x): {scaled_loss.item():.6f}")
+        
+        if i >= 9:  # Check first 10 batches
+            break
+
+avg_test_loss = sum(test_losses) / len(test_losses)
+print(f"\nAverage test loss (raw): {avg_test_loss:.6f}")
+print(f"Average test loss (scaled 1000x): {avg_test_loss * 1000:.6f}")
+
 # Evaluation function for trained model
 def evaluate_trained(model, batch):
     inputs, outputs = batch[0]
@@ -72,7 +120,7 @@ def evaluate_trained(model, batch):
     model_output = model.forward(input_ids)
     
     # Same loss scaling as compiled model (1000x)
-    loss = F.mse_loss(model_output, targets) * 1000000
+    loss = F.mse_loss(model_output, targets) * 1000
     
     return loss, {"logits": model_output}
 
@@ -107,7 +155,7 @@ plot_trace(
     trace,
     "Loss",
     x_axis="Step",
-    title=f"Trained Model Loss Trace, avg LLC = {avg_llc:.2f}",
+    title=f"Trained Model Loss Trace, avg LLC = {avg_llc}",
     plot_mean=False,
     plot_std=False,
     fig_size=(12, 9),
