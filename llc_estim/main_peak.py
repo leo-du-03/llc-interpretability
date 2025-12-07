@@ -22,7 +22,7 @@ def get_peak_model():
     )
     return model
 
-from test_datasets.test_peak import get_peak_test_cases
+from datasets.peak_data import get_peak_test_cases
 def get_peak_test_data(): # get the test_cases from test_peak.py (cleaner)
     return get_peak_test_cases() 
 

@@ -18,6 +18,7 @@ Files:
 ### llc_estim
 This folder contains jupyter notebooks to estimate LLCs for various compiled transformers.
 Files:
+- `haiku_to_pytorch_rg.py`: Contains useful functions for converting haiku models to pytorch.
 - `llc_dev.ipynb`: A test notebook to develop the workflow for estimating LLCs. Used the palindrome compiled transformer.
 - `llc_fractok.ipynb`: Estimates LLC for the previous fraction is token problem.
 - `main_peak.py`: Python script to estimate LLC for the peak detection problem.

@@ -1,5 +1,5 @@
 import random
-from palindrome import check_palindrome
+from rasp_models.palindrome import check_palindrome
 import numpy as np
 import torch
 
