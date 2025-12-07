@@ -11,7 +11,7 @@ from llc_estimator import (
     plot_llc_trace
 )
 
-import peak
+from rasp_models import peak
 def get_peak_model():
     bos = "BOS"
     model = compiling.compile_rasp_to_model(
