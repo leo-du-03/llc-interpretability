@@ -170,7 +170,7 @@ if __name__ == "__main__":
     MAX_SEQ_LEN = 10
     VOCAB_SIZE = 'medium'
     BATCH_SIZE = 32
-    EPOCHS = 200
+    EPOCHS = 100
     
     # Create data loader
     train_loader = makeFractokTrainDataLoader(
