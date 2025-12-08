@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 from tqdm import tqdm
-from dataloaders import makeFractokTrainDataLoader, CHAR2IDX
+from datasets.dataloaders import makeFractokTrainDataLoader, CHAR2IDX
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 

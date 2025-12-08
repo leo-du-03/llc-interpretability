@@ -1,6 +1,8 @@
-from palindrome import check_palindrome
+from rasp_models.palindrome import check_palindrome
+from rasp_models.peak import get_peak_model
 from tracr.haiku_to_pytorch import haiku_to_pytorch, apply, outputs_equal
-from test_datasets.generate_tests import generate_non_palindromes, generate_palindromes
+from datasets.palindrome_data import generate_non_palindromes, generate_palindromes
+from datasets.peak_data import get_peak_test_cases
 
 def palindromesTests():
     # NOTE: RASP doesn't seem to be able to properly calculate the length of any array with length >= 10, always too low by 1 in this case.
@@ -55,8 +57,6 @@ def palindromesTests():
         assert(out.decoded == truth)
 
 
-from peak import get_peak_model
-from test_datasets.test_peak import get_peak_test_cases
 def peakTests():
     bos = "BOS"
     model = get_peak_model()
