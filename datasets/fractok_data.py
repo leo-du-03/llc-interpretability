@@ -1,5 +1,5 @@
 import random
-from fractok import check_fractok
+from rasp_models.fractok import check_fractok
 import numpy as np
 import torch
 

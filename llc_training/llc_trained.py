@@ -3,9 +3,9 @@ from torch.nn import functional as F
 from devinterp.optim import SGLD
 from devinterp.slt.sampler import estimate_learning_coeff_with_summary
 from devinterp.utils import default_nbeta
-from dataloaders import makeFractokDataLoader, CHAR2IDX
+from datasets.dataloaders import makeFractokDataLoader, CHAR2IDX
 from train_fractok import TransformerForFractok
-from fractok import check_fractok
+from rasp_models.fractok import check_fractok
 import numpy as np
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
