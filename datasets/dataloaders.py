@@ -1,8 +1,8 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
-from palindrome_data import generate_all_palindrome_testcases
-from peak_data import get_peak_test_cases
-from fractok_data import generate_all_prev_fraction_tokens_x_testcases, generate_fractok_training_data
+from datasets.palindrome_data import generate_all_palindrome_testcases
+from datasets.peak_data import get_peak_test_cases
+from datasets.fractok_data import generate_all_prev_fraction_tokens_x_testcases, generate_fractok_training_data
 
 VOCAB = ['BOS'] + list("abcdefghijklmnopqrstuvwxyz")  # include all chars you expect
 CHAR2IDX = {ch: i for i, ch in enumerate(VOCAB)}
