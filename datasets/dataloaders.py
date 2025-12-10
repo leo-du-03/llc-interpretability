@@ -31,16 +31,18 @@ def identityCollator(batch):
     
 def getSequenceDataLoader(sequences):
     # return DataLoader(SequenceDataset(sequences=sequences), collate_fn=tensor_collate, shuffle=True)
-
     return DataLoader(SequenceDataset(sequences=sequences), batch_size=1, collate_fn=identityCollator, shuffle=True)
-
 
 def makePalindromeDataLoader(num_palin):
     data = generate_all_palindrome_testcases(num_palin)
     return getSequenceDataLoader(data)
 
 def makePeakDataLoader():
-    data = get_peak_test_cases()
+    data = get_peak_test_cases(0)
+    return getSequenceDataLoader(data)
+
+def makeDomPeakDataLoader():
+    data = get_peak_test_cases(1)
     return getSequenceDataLoader(data)
 
 def makeFractokDataLoader(max_seq_len=10, vocab_size='medium'):
@@ -95,3 +97,4 @@ if __name__ == "__main__":
     makePalindromeDataLoader()
     makePeakDataLoader()
     makeFractokDataLoader()
+    makeDomPeakDataLoader()
