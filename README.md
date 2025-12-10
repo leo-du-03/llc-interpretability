@@ -21,8 +21,8 @@ Files:
 - `haiku_to_pytorch_rg.py`: Contains useful functions for converting haiku models to pytorch.
 - `llc_dev.ipynb`: A test notebook to develop the workflow for estimating LLCs. Used the palindrome compiled transformer.
 - `llc_fractok.ipynb`: Estimates LLC for the previous fraction is token problem.
-- 'llc_peak.ipynb': Estimates LLC for peak detection problem.
-- 'llc_dompeak.ipynb': Estimates LLC for dominant peak detection problem.
+- `llc_peak.ipynb`: Estimates LLC for peak detection problem.
+- `llc_dompeak.ipynb`: Estimates LLC for dominant peak detection problem.
 - `main_peak.py`: Python script to estimate LLC for the peak detection problem.
 - `pal_llc_estim.ipynb`: Estimates LLC for the palindrome detection problem.
 - `pal_llc_no_rand_head.ipynb`: Estimates LLC for a transformer that adds an extra embedding head to the compiled transformer 
@@ -51,7 +51,7 @@ Files:
 - `fractok.py`: Python script to define and initialize a compiled transformer for the previous fraction is token problem.
 - `palindrome.py`: Python script to define and initialize a compiled transformer for the palindrome detection problem.
 - `peak.py`: Python script to define and initialize a compiled transformer for the peak detection problem.
-- 'dominantpeak.py':  Python script to define and initialize a compiled transformer for the dominant peak detection problem (which builds off of the peak detection problem).
+- `dominantpeak.py`:  Python script to define and initialize a compiled transformer for the dominant peak detection problem (which builds off of the peak detection problem).
 ### results
 Folder to store various results of interest for future presentations.
 ### tests
