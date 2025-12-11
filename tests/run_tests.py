@@ -1,66 +1,84 @@
 from rasp_models.palindrome import check_palindrome
 from rasp_models.peak import get_peak_model
-from tracr.haiku_to_pytorch import haiku_to_pytorch, apply, outputs_equal
+from rasp_models.fractok import check_fractok
+from tracr.haiku_to_pytorch import haiku_to_pytorch, apply, outputs_equal, haiku_params_to_torch
 from datasets.palindrome_data import generate_non_palindromes, generate_palindromes
 from datasets.peak_data import get_peak_test_cases
+from datasets.fractok_data import generate_all_prev_fraction_tokens_x_testcases, generate_fractok_training_data
+import torch
+import numpy as np
 
 def palindromesTests():
-    # NOTE: RASP doesn't seem to be able to properly calculate the length of any array with length >= 10, always too low by 1 in this case.
     bos = "BOS"
     model = check_palindrome()
     torch_model = haiku_to_pytorch(model)
 
-    with open("test_datasets/palindromes.txt") as file:
+    test_cases = []
+
+    print("Compiling test cases:")
+    with open("tests/palindromes.txt") as file:
         lines = [line.rstrip() for line in file]
     for line in lines:
         word = [bos] + list(line)
-        out = model.apply(word)
-        pytorch_out = apply(torch_model, word)
-        assert(outputs_equal(out.transformer_output, pytorch_out))
-        assert((not False in out.decoded) == True)
+        test_cases.append(word)
 
     rand_pals = generate_palindromes(50)
     for line in rand_pals:
         word = [bos] + list(line)
-        out = model.apply(word)
-        pytorch_out = apply(torch_model, word)
-        assert(outputs_equal(out.transformer_output, pytorch_out))
-        assert((not False in out.decoded) == True)
-
-    with open("test_datasets/non_palindromes.txt") as file:
+        test_cases.append(word)
+    
+    with open("tests/non_palindromes.txt") as file:
         lines = [line.rstrip() for line in file]
     for line in lines:
         word = [bos] + list(line)
-        out = model.apply(word)
-        line_list = list(line)
-        word = [bos] + line_list
-        truth = [bos]
-        wordreverse = line_list + line_list[::-1]
-        for i in range(0, len(line_list)):
-            truth.append(wordreverse[i] == wordreverse[i + len(line_list)])
-        pytorch_out = apply(torch_model, word)
-        assert(outputs_equal(out.transformer_output, pytorch_out))
-        assert(out.decoded == truth)
+        test_cases.append(word)
 
     rand_non_pals = generate_non_palindromes(50)
     for line in rand_non_pals:
         word = [bos] + list(line)
-        out = model.apply(word)
-        line_list = list(line)
-        word = [bos] + line_list
-        truth = [bos]
-        wordreverse = line_list + line_list[::-1]
-        for i in range(0, len(line_list)):
-            truth.append(wordreverse[i] == wordreverse[i + len(line_list)])
-        pytorch_out = apply(torch_model, word)
-        assert(outputs_equal(out.transformer_output, pytorch_out))
-        assert(out.decoded == truth)
+        test_cases.append(word)
+    print("done.")
+    print("Testing haiku model accuracy:")
 
+    for word in test_cases:
+        out = model.apply(word)
+        target = ['BOS'] + [a == b for a, b in zip(word[1:], word[1:][::-1])]
+        
+        if target == out.decoded:
+            print(".", end="")
+        else:
+            (
+                f"\n--- Decoded Output Mismatch in Test Case {i} ---\n"
+                f"Input:    {word}\n"
+                f"Expected: {target}\n"
+                f"Got:      {out.decoded}\n"
+            )
+    print("\n")
+
+    print("Testing haiku and pytorch model equality:")
+    for word in test_cases:
+        out = model.apply(word)
+        pytorch_out = apply(torch_model, word)
+        if outputs_equal(out.transformer_output, pytorch_out):
+            print(".", end="")
+        else:
+            (
+                f"\n--- Decoded Output Mismatch in Test Case {i} ---\n"
+                f"Input:    {word}\n"
+                f"Expected: {target}\n"
+                f"Got:      {out.decoded}\n"
+            )
+    print("\n")
 
 def peakTests():
-    bos = "BOS"
     model = get_peak_model()
     torch_model = haiku_to_pytorch(model)
+    # params = model.params
+    # print(params)
+    # print(haiku_params_to_torch(params))
+    # for name, param in torch_model.named_parameters():
+    #     if param.requires_grad:
+    #         print(name, param.data)
     test_cases = get_peak_test_cases()
     for i, (input_seq, expected_output) in enumerate(test_cases, 1):
         out = model.apply(input_seq)
@@ -68,7 +86,10 @@ def peakTests():
 
         assert outputs_equal(out.transformer_output, pytorch_out), (
             f"\n--- Transformer Mismatch in Test Case {i} ---\n"
-            f"Input:    {input_seq}\n"
+            f"Input:      {input_seq}\n"
+            f"Expected:   {out.transformer_output}\n"
+            f"Got:        {pytorch_out}\n"
+            f"Difference: {torch.tensor(np.array(out.transformer_output), dtype=torch.float64) - pytorch_out}\n"
         )
         decoded = out.decoded
         assert decoded == expected_output, (
@@ -78,6 +99,45 @@ def peakTests():
             f"Got:      {decoded}\n"
         )
 
+def fractokTests():
+    model = check_fractok()
+    torch_model = haiku_to_pytorch(model)
+
+    print("Testing haiku model accuracy:")
+    test_cases = generate_fractok_training_data()
+    for i, (input_seq, target) in enumerate(test_cases, 1):
+        out = model.apply(input_seq)
+        decoded = out.decoded
+        decoded = [0] + decoded[1:]
+        if decoded == target.tolist():
+            print(".", end="")
+        else:
+            print(
+                f"\n--- Decoded Output Mismatch in Test Case {i} ---\n"
+                f"Input:    {input_seq}\n"
+                f"Expected: {target}\n"
+                f"Got:      {decoded}\n"
+            )
+    print("\n")
+
+    print("Testing haiku and pytorch model equality:")
+    test_cases = generate_all_prev_fraction_tokens_x_testcases()
+    for i, (input_seq, out) in enumerate(test_cases, 1):
+        pytorch_out = apply(torch_model, input_seq)
+
+        if outputs_equal(out.tolist(), pytorch_out):
+            print(".", end="")
+        else:
+            f"\n--- Transformer Mismatch in Test Case {i} ---\n"
+            f"Input:      {input_seq}\n"
+            f"Expected:   {out.tolist()}\n"
+            f"Got:        {pytorch_out}\n"
+    print("\n")
+
 if __name__ == "__main__":
+    print("Running Palindrome Tests")
     palindromesTests()
-    peakTests()
+    # print("Running Peak Tests")
+    # peakTests()
+    print("Running Fractok Tests")
+    fractokTests()

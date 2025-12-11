@@ -1,8 +1,8 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
-from palindrome_data import generate_all_palindrome_testcases
-from peak_data import get_peak_test_cases
-from fractok_data import generate_all_prev_fraction_tokens_x_testcases, generate_fractok_training_data
+from datasets.palindrome_data import generate_all_palindrome_testcases
+from datasets.peak_data import get_peak_test_cases
+from datasets.fractok_data import generate_all_prev_fraction_tokens_x_testcases, generate_fractok_training_data
 
 VOCAB = ['BOS'] + list("abcdefghijklmnopqrstuvwxyz")  # include all chars you expect
 CHAR2IDX = {ch: i for i, ch in enumerate(VOCAB)}
@@ -31,16 +31,18 @@ def identityCollator(batch):
     
 def getSequenceDataLoader(sequences):
     # return DataLoader(SequenceDataset(sequences=sequences), collate_fn=tensor_collate, shuffle=True)
-
     return DataLoader(SequenceDataset(sequences=sequences), batch_size=1, collate_fn=identityCollator, shuffle=True)
-
 
 def makePalindromeDataLoader(num_palin):
     data = generate_all_palindrome_testcases(num_palin)
     return getSequenceDataLoader(data)
 
 def makePeakDataLoader():
-    data = get_peak_test_cases()
+    data = get_peak_test_cases(0)
+    return getSequenceDataLoader(data)
+
+def makeDomPeakDataLoader():
+    data = get_peak_test_cases(1)
     return getSequenceDataLoader(data)
 
 def makeFractokDataLoader(max_seq_len=10, vocab_size='medium'):
@@ -95,3 +97,4 @@ if __name__ == "__main__":
     makePalindromeDataLoader()
     makePeakDataLoader()
     makeFractokDataLoader()
+    makeDomPeakDataLoader()
