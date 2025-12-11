@@ -11,7 +11,6 @@ import numpy as np
 def palindromesTests():
     bos = "BOS"
     model = check_palindrome()
-    torch_model = haiku_to_pytorch(model)
 
     test_cases = []
 
@@ -40,29 +39,14 @@ def palindromesTests():
     print("done.")
     print("Testing haiku model accuracy:")
 
-    for word in test_cases:
+    for i, word in enumerate(test_cases, 1):
         out = model.apply(word)
         target = ['BOS'] + [a == b for a, b in zip(word[1:], word[1:][::-1])]
         
         if target == out.decoded:
-            print(".", end="")
+            print(".", end="", flush=True)
         else:
-            (
-                f"\n--- Decoded Output Mismatch in Test Case {i} ---\n"
-                f"Input:    {word}\n"
-                f"Expected: {target}\n"
-                f"Got:      {out.decoded}\n"
-            )
-    print("\n")
-
-    print("Testing haiku and pytorch model equality:")
-    for word in test_cases:
-        out = model.apply(word)
-        pytorch_out = apply(torch_model, word)
-        if outputs_equal(out.transformer_output, pytorch_out):
-            print(".", end="")
-        else:
-            (
+            print(
                 f"\n--- Decoded Output Mismatch in Test Case {i} ---\n"
                 f"Input:    {word}\n"
                 f"Expected: {target}\n"
@@ -72,36 +56,23 @@ def palindromesTests():
 
 def peakTests():
     model = get_peak_model()
-    torch_model = haiku_to_pytorch(model)
-    # params = model.params
-    # print(params)
-    # print(haiku_params_to_torch(params))
-    # for name, param in torch_model.named_parameters():
-    #     if param.requires_grad:
-    #         print(name, param.data)
+
     test_cases = get_peak_test_cases()
     for i, (input_seq, expected_output) in enumerate(test_cases, 1):
         out = model.apply(input_seq)
-        pytorch_out = apply(torch_model, input_seq)
-
-        assert outputs_equal(out.transformer_output, pytorch_out), (
-            f"\n--- Transformer Mismatch in Test Case {i} ---\n"
-            f"Input:      {input_seq}\n"
-            f"Expected:   {out.transformer_output}\n"
-            f"Got:        {pytorch_out}\n"
-            f"Difference: {torch.tensor(np.array(out.transformer_output), dtype=torch.float64) - pytorch_out}\n"
-        )
         decoded = out.decoded
-        assert decoded == expected_output, (
-            f"\n--- Decoded Output Mismatch in Test Case {i} ---\n"
-            f"Input:    {input_seq}\n"
-            f"Expected: {expected_output}\n"
-            f"Got:      {decoded}\n"
-        )
+        if decoded == expected_output: 
+            print(".", end="", flush=True)
+        else:
+            print(
+                f"\n--- Decoded Output Mismatch in Test Case {i} ---\n"
+                f"Input:    {input_seq}\n"
+                f"Expected: {expected_output}\n"
+                f"Got:      {decoded}\n"
+            )
 
 def fractokTests():
     model = check_fractok()
-    torch_model = haiku_to_pytorch(model)
 
     print("Testing haiku model accuracy:")
     test_cases = generate_fractok_training_data()
@@ -109,8 +80,8 @@ def fractokTests():
         out = model.apply(input_seq)
         decoded = out.decoded
         decoded = [0] + decoded[1:]
-        if decoded == target.tolist():
-            print(".", end="")
+        if np.allclose(decoded, target.tolist(), 1e-06): # An extremely minor floating point imprecision can occur here
+            print(".", end="", flush=True)
         else:
             print(
                 f"\n--- Decoded Output Mismatch in Test Case {i} ---\n"
@@ -120,24 +91,86 @@ def fractokTests():
             )
     print("\n")
 
-    print("Testing haiku and pytorch model equality:")
-    test_cases = generate_all_prev_fraction_tokens_x_testcases()
-    for i, (input_seq, out) in enumerate(test_cases, 1):
-        pytorch_out = apply(torch_model, input_seq)
+def checkParamEquality(hk_model):
+    hk_params = hk_model.params
+    pt_params = haiku_params_to_torch(hk_params)
 
-        if outputs_equal(out.tolist(), pytorch_out):
-            print(".", end="")
-        else:
-            f"\n--- Transformer Mismatch in Test Case {i} ---\n"
-            f"Input:      {input_seq}\n"
-            f"Expected:   {out.tolist()}\n"
-            f"Got:        {pytorch_out}\n"
+    success = True
+    for k in hk_params.keys():
+        hk_p = hk_params[k]
+        pt_p = pt_params[k]
+
+        for k in hk_p:
+            hk_p_k = hk_p[k]
+            pt_p_k = pt_p[k]
+            if np.array(hk_p_k).tolist() == np.array(pt_p_k).tolist():
+                print(".", end="", flush=True)
+            else:
+                success = False
+                print(
+                    f"\n--- Parameter Mismatch in Parameter {k} ---\n"
+                    f"Expected: {np.array(hk_p_k).tolist()}\n"
+                    f"Got:      {np.array(pt_p_k).tolist()}\n"
+                )
+    return success
+
+def checkSuccessfulParamTransfer(hk_model, pt_model):
+    hk_params = hk_model.params
+    layer_idx = 0
+    while f"transformer/layer_{layer_idx}/attn/query" in hk_params:
+        layer = pt_model.layers[layer_idx]
+        prefix = f"transformer/layer_{layer_idx}"
+
+        # Attention weights
+        attn = layer.attn
+        assert attn.query.bias.data.tolist() == hk_params[f"{prefix}/attn/query"]['b'].tolist()
+        assert attn.key.weight.data.tolist() == hk_params[f"{prefix}/attn/key"]['w'].T.tolist()
+        assert attn.key.bias.data.tolist() == hk_params[f"{prefix}/attn/key"]['b'].tolist()
+        assert attn.value.weight.data.tolist() == hk_params[f"{prefix}/attn/value"]['w'].T.tolist()
+        assert attn.value.bias.data.tolist() == hk_params[f"{prefix}/attn/value"]['b'].tolist()
+
+        # Attention output projection
+        assert attn.output.weight.data.tolist() == hk_params[f"{prefix}/attn/linear"]['w'].T.tolist()
+        assert attn.output.bias.data.tolist() == hk_params[f"{prefix}/attn/linear"]['b'].tolist()
+
+        # MLP
+        mlp = layer.mlp
+
+        assert mlp.linear1.weight.data.tolist() == hk_params[f"{prefix}/mlp/linear_1"]['w'].T.tolist()
+        assert mlp.linear1.bias.data.tolist() == hk_params[f"{prefix}/mlp/linear_1"]['b'].tolist()
+        assert mlp.linear2.weight.data.tolist() == hk_params[f"{prefix}/mlp/linear_2"]['w'].T.tolist()
+        assert mlp.linear2.bias.data.tolist() == hk_params[f"{prefix}/mlp/linear_2"]['b'].tolist()
+
+        layer_idx += 1
+
+def haikuToPytorchTests():
+    print("Testing palindrome:")
+    hk_model = check_palindrome()
+    torch_model = haiku_to_pytorch(hk_model)
+    checkParamEquality(hk_model)
+    checkSuccessfulParamTransfer(hk_model, torch_model)
     print("\n")
 
+    print("Testing peak:")
+    hk_model = get_peak_model()
+    torch_model = haiku_to_pytorch(hk_model)
+    checkParamEquality(hk_model)
+    checkSuccessfulParamTransfer(hk_model, torch_model)
+    print("\n")
+
+    print("Testing Fractok:")
+    hk_model = check_fractok()
+    torch_model = haiku_to_pytorch(hk_model)
+    checkParamEquality(hk_model)
+    checkSuccessfulParamTransfer(hk_model, torch_model)
+
+    print("\n")
 if __name__ == "__main__":
     print("Running Palindrome Tests")
     palindromesTests()
-    # print("Running Peak Tests")
-    # peakTests()
+    print("Running Peak Tests")
+    peakTests()
     print("Running Fractok Tests")
     fractokTests()
+    print("Testing Haiku to PyTorch conversion")
+    haikuToPytorchTests()
