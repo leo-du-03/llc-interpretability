@@ -1,0 +1,9 @@
+ablation,description,llc_mean,llc_std,num_trials
+full_model,Full model (baseline),26.7086,0.7798,3
+no_attn_L0,No attention in layer 0,25.5944,0.8458,3
+no_attn_L1,No attention in layer 1,17.7702,0.4026,3
+no_layer_0,Remove layer 0,25.2638,0.2122,3
+no_layer_1,Remove layer 1,16.9904,0.2307,3
+no_layers,Remove both layers,,,0
+no_mlp_L0,No MLP in layer 0,26.2264,0.4506,3
+no_mlp_L1,No MLP in layer 1,26.1444,0.4833,3
