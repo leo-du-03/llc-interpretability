@@ -5,10 +5,14 @@ from tracr.haiku_to_pytorch import haiku_to_pytorch, apply, outputs_equal, haiku
 from datasets.palindrome_data import generate_non_palindromes, generate_palindromes
 from datasets.peak_data import get_peak_test_cases
 from datasets.fractok_data import generate_all_prev_fraction_tokens_x_testcases, generate_fractok_training_data
+from llc_training.grokking.peak_models import Small, Medium, Large, Nano
 import torch
 import numpy as np
 
 def palindromesTests():
+    '''
+    Tests the palindrome model, makes sure the model is outputing the correct answers
+    '''
     bos = "BOS"
     model = check_palindrome()
 
@@ -55,9 +59,12 @@ def palindromesTests():
     print("\n")
 
 def peakTests():
+    '''
+    Tests the peak haiku model, makes sure the model is outputing the correct answers
+    '''
     model = get_peak_model()
 
-    test_cases = get_peak_test_cases()
+    test_cases = get_peak_test_cases(0)
     for i, (input_seq, expected_output) in enumerate(test_cases, 1):
         out = model.apply(input_seq)
         decoded = out.decoded
@@ -72,6 +79,9 @@ def peakTests():
             )
 
 def fractokTests():
+    '''
+    Tests the fractok haiku model, makes sure the model is outputing the correct answers
+    '''
     model = check_fractok()
 
     print("Testing haiku model accuracy:")
@@ -92,6 +102,11 @@ def fractokTests():
     print("\n")
 
 def checkParamEquality(hk_model):
+    '''
+    Makes sure the haiku parameters are converted correctly into pytorch parameters.
+    
+    :param hk_model: haiku model you are turning into a pytorch model
+    '''
     hk_params = hk_model.params
     pt_params = haiku_params_to_torch(hk_params)
 
@@ -115,6 +130,12 @@ def checkParamEquality(hk_model):
     return success
 
 def checkSuccessfulParamTransfer(hk_model, pt_model):
+    '''
+    Checks to make sure the pytorch model's parameters are successfully loaded
+
+    :param hk_model: haiku model you are pulling parameters from
+    :param pt_model: pytorch model you have loaded parameters into
+    '''
     hk_params = hk_model.params
     layer_idx = 0
     while f"transformer/layer_{layer_idx}/attn/query" in hk_params:
@@ -144,6 +165,12 @@ def checkSuccessfulParamTransfer(hk_model, pt_model):
         layer_idx += 1
 
 def haikuToPytorchTests():
+    '''
+    Tests the haikuToPytorch function's critical capabilities:
+        1. Ensures parameters are correctly converted from haiku to pytorch
+        2. Ensures parameters are successfully loaded into pytorch model
+    If these 2 criteria are met, the haiku and pytorch models are considered equal
+    '''
     print("Testing palindrome:")
     hk_model = check_palindrome()
     torch_model = haiku_to_pytorch(hk_model)
@@ -165,6 +192,46 @@ def haikuToPytorchTests():
     checkSuccessfulParamTransfer(hk_model, torch_model)
 
     print("\n")
+
+def testLoadingGrokkingPeakModels():
+    '''
+    Makes sure the custom peak models used to test training 
+    using the Timaeus Grokking notebook can load correctly.
+    '''
+    DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+    class ExperimentParams:
+        p: int = 100
+        l: int = 5
+        v = 12
+        n_batches: int = 1000
+        n_save_model_checkpoints: int = 100
+        print_times: int = 100
+        lr: float = 3e-3
+        batch_size: int = 128
+        hidden_size: int = 48
+        linear_hidden_size: int = 200
+        embed_dim: int = 127
+        train_frac: float = 0.4
+        random_seed: int = 0
+        device: str = DEVICE
+        weight_decay: float = 2e-5
+        blocks: int = 6
+    params = ExperimentParams()
+    torch.manual_seed(params.random_seed)
+    nano = Nano(params).to(params.device)
+    small = Small(params).to(params.device)
+    medium = Medium(params).to(params.device)
+    large = Large(params).to(params.device)
+
+    assert(nano != None)
+    print(".", end="", flush=True)
+    assert(small != None)
+    print(".", end="", flush=True)
+    assert(medium != None)
+    print(".", end="", flush=True)
+    assert(large != None)
+    print(".", flush=True)
+
 if __name__ == "__main__":
     print("Running Palindrome Tests")
     palindromesTests()
@@ -174,3 +241,5 @@ if __name__ == "__main__":
     fractokTests()
     print("Testing Haiku to PyTorch conversion")
     haikuToPytorchTests()
+    print("Testing peak grokking models")
+    testLoadingGrokkingPeakModels()
