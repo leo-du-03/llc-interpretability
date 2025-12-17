@@ -6,6 +6,7 @@ from datasets.fractok_data import generate_all_prev_fraction_tokens_x_testcases,
 from datasets.histogram_data import get_histogram_test_cases
 from datasets.sort_data import get_sort_test_cases
 from datasets.reverse_data import get_reverse_test_cases
+from datasets.triplets_data import get_triplets_test_cases
 
 VOCAB = ['BOS'] + list("abcdefghijklmnopqrstuvwxyz")  # include all chars you expect
 CHAR2IDX = {ch: i for i, ch in enumerate(VOCAB)}
@@ -64,6 +65,10 @@ def makeSortDataLoader(vocab=None, max_seq_len=10):
 def makeReverseDataLoader(vocab=None, max_seq_len=10):
     data = get_reverse_test_cases(vocab=vocab, max_seq_len=max_seq_len)
     return getSequenceDataLoader(data)
+
+def makeTripletsDataLoader(vocab=None, max_seq_len=10):
+    data = get_triplets_test_cases(vocab=vocab, max_seq_len=max_seq_len)
+    return getSequenceDataLoader(data)
     
 def tensor_collate(batch):
     inputs, targets = zip(*batch)
@@ -116,3 +121,4 @@ if __name__ == "__main__":
     makeHistogramDataLoader()
     makeSortDataLoader()
     makeReverseDataLoader()
+    makeTripletsDataLoader()
