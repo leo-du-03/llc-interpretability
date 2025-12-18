@@ -4,6 +4,13 @@ from datasets.palindrome_data import generate_all_palindrome_testcases
 from datasets.peak_data import get_peak_test_cases
 from datasets.fractok_data import generate_all_prev_fraction_tokens_x_testcases, generate_fractok_training_data
 
+"""
+Contains dataloaders that are ready to use out of the box for tasks:
+    - Fractok
+    - Palindrome
+    - Peak & Dominant Peak
+"""
+
 VOCAB = ['BOS'] + list("abcdefghijklmnopqrstuvwxyz")  # include all chars you expect
 CHAR2IDX = {ch: i for i, ch in enumerate(VOCAB)}
 
@@ -33,8 +40,13 @@ def getSequenceDataLoader(sequences):
     # return DataLoader(SequenceDataset(sequences=sequences), collate_fn=tensor_collate, shuffle=True)
     return DataLoader(SequenceDataset(sequences=sequences), batch_size=1, collate_fn=identityCollator, shuffle=True)
 
-def makePalindromeDataLoader(num_palin):
-    data = generate_all_palindrome_testcases(num_palin)
+def makePalindromeDataLoader(num_per_class):
+    """
+    Creates a dataloader containing data for the palindrome task
+    
+    :param num_per_class: number of data points that should get generated per class (palindrome and non-palindrome)
+    """
+    data = generate_all_palindrome_testcases(num_per_class)
     return getSequenceDataLoader(data)
 
 def makePeakDataLoader():

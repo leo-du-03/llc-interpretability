@@ -1,6 +1,12 @@
 from tracr.rasp import rasp
 from tracr.compiler import compiling
 
+"""
+This file contains the code that defines and initializes a RASP model that solves the peak detection task.
+peak: defines the model
+check_peak: initializes the model
+"""
+
 def peak():
     # Getting indicies of L,R neighbors
     left_idx = rasp.indices - 1

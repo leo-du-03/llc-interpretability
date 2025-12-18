@@ -7,6 +7,26 @@ We aim to investigate three things:
 - Using LLC as a metric in model training and validation
 - Measuring the effect of ablations on models by measuring LLC before and after the ablation
 
+## User Guide
+Navigate to the top level of this repository.
+From there, run the following commands:
+```
+cd tracr
+pip install .
+cd ..
+pip install -r requirements.txt
+pip install -e .
+```
+
+You should have everything you need now!
+Use the below command to run our full test suite. 
+```
+python tests/run_tests.py
+```
+
+You may see a warning like this: `An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.`
+This is safe to ignore.
+
 ## Repository Structure
 ### datasets
 This folder contains python scripts that generate datasets and dataloaders for the various models we use.
