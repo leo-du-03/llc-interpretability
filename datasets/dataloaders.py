@@ -3,6 +3,17 @@ from torch.utils.data import Dataset, DataLoader
 from datasets.palindrome_data import generate_all_palindrome_testcases
 from datasets.peak_data import get_peak_test_cases
 from datasets.fractok_data import generate_all_prev_fraction_tokens_x_testcases, generate_fractok_training_data
+from datasets.histogram_data import get_histogram_test_cases
+from datasets.sort_data import get_sort_test_cases
+from datasets.reverse_data import get_reverse_test_cases
+from datasets.triplets_data import get_triplets_test_cases
+
+"""
+Contains dataloaders that are ready to use out of the box for tasks:
+    - Fractok
+    - Palindrome
+    - Peak & Dominant Peak
+"""
 
 VOCAB = ['BOS'] + list("abcdefghijklmnopqrstuvwxyz")  # include all chars you expect
 CHAR2IDX = {ch: i for i, ch in enumerate(VOCAB)}
@@ -33,8 +44,13 @@ def getSequenceDataLoader(sequences):
     # return DataLoader(SequenceDataset(sequences=sequences), collate_fn=tensor_collate, shuffle=True)
     return DataLoader(SequenceDataset(sequences=sequences), batch_size=1, collate_fn=identityCollator, shuffle=True)
 
-def makePalindromeDataLoader(num_palin):
-    data = generate_all_palindrome_testcases(num_palin)
+def makePalindromeDataLoader(num_per_class):
+    """
+    Creates a dataloader containing data for the palindrome task
+    
+    :param num_per_class: number of data points that should get generated per class (palindrome and non-palindrome)
+    """
+    data = generate_all_palindrome_testcases(num_per_class)
     return getSequenceDataLoader(data)
 
 def makePeakDataLoader():
@@ -48,6 +64,22 @@ def makeDomPeakDataLoader():
 def makeFractokDataLoader(max_seq_len=10, vocab_size='medium'):
     # Placeholder: Replace with actual fractok data generation
     data = generate_all_prev_fraction_tokens_x_testcases(max_seq_len=max_seq_len, vocab_size=vocab_size)  # Should be list of (input, truth) pairs
+    return getSequenceDataLoader(data)
+
+def makeHistogramDataLoader(vocab=None, max_seq_len=10):
+    data = get_histogram_test_cases(vocab=vocab, max_seq_len=max_seq_len)
+    return getSequenceDataLoader(data)
+
+def makeSortDataLoader(vocab=None, max_seq_len=10):
+    data = get_sort_test_cases(vocab=vocab, max_seq_len=max_seq_len)
+    return getSequenceDataLoader(data)
+
+def makeReverseDataLoader(vocab=None, max_seq_len=10):
+    data = get_reverse_test_cases(vocab=vocab, max_seq_len=max_seq_len)
+    return getSequenceDataLoader(data)
+
+def makeTripletsDataLoader(vocab=None, max_seq_len=10):
+    data = get_triplets_test_cases(vocab=vocab, max_seq_len=max_seq_len)
     return getSequenceDataLoader(data)
     
 def tensor_collate(batch):
@@ -98,3 +130,7 @@ if __name__ == "__main__":
     makePeakDataLoader()
     makeFractokDataLoader()
     makeDomPeakDataLoader()
+    makeHistogramDataLoader()
+    makeSortDataLoader()
+    makeReverseDataLoader()
+    makeTripletsDataLoader()

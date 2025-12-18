@@ -1,0 +1,9 @@
+Component,LLC,Δ from Baseline,% Change
+Full Model,26.7,—,—
+No MLP L0,26.2,-0.5,-2%
+No MLP L1,26.1,-0.6,-2%
+No Attn L0,25.6,-1.1,-4%
+No Layer 0,25.3,-1.4,-5%
+No Attn L1,17.8,-8.9,-33%
+No Layer 1,17.0,-9.7,-36%
+No Layers,,,N/A

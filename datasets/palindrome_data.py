@@ -3,7 +3,18 @@ from rasp_models.palindrome import check_palindrome
 import numpy as np
 import torch
 
+"""
+Contains functions that generate lists of palindromes and non-palindromes.
+Meant for use in training models.
+"""
+
 def generate_palindromes(n, end_char='z'):
+    """
+    Generates palindromes consisting of random characters of length 2-10.
+    
+    :param n: Number of palindromes to generate
+    :param end_char: The vocabulary will go from a to end_char.
+    """
     palindromes = []
     for _ in range(n):
         word = ""
@@ -19,6 +30,12 @@ def generate_palindromes(n, end_char='z'):
     return palindromes
 
 def generate_non_palindromes(n, end_char='z'):
+    """
+    Generates non-palindromes consisting of random characters of length 2-10.
+    
+    :param n: Number of non-palindromes to generate
+    :param end_char: The vocabulary will go from a to end_char.
+    """
     non_palindromes = []
     for _ in range(n):
         word = ""
@@ -29,18 +46,25 @@ def generate_non_palindromes(n, end_char='z'):
             non_palindromes.append(word)
     return non_palindromes
 
-def generate_all_palindrome_testcases(num_palin, end_char='z'):
+def generate_all_palindrome_testcases(num_per_class, end_char='z'):
+    """
+    Generates a list of palindromes and non-palindromes in equal counts.
+    Formats them into input, output pairs for training.
+    
+    :param num_palin: number of each class to generate
+    :param end_char: vocabulary will go from a to end_char
+    """
     all_cases = []
     bos = "BOS"
     model = check_palindrome()
 
-    rand_pals = generate_palindromes(num_palin, end_char)
+    rand_pals = generate_palindromes(num_per_class, end_char)
     for line in rand_pals:
         word = [bos] + list(line)
         out = model.apply(word)
         all_cases.append((word, torch.tensor(np.array(out.transformer_output), dtype=torch.float64)))
 
-    rand_non_pals = generate_non_palindromes(num_palin, end_char)
+    rand_non_pals = generate_non_palindromes(num_per_class, end_char)
     for line in rand_non_pals:
         line_list = list(line)
         word = [bos] + line_list
