@@ -4,7 +4,12 @@ from rasp_models.dominantpeak import get_dompeak_model
 import numpy as np
 import torch
 
-def generate_peak_sequences(n, min_length=3, max_length=9, min_val=0, max_val=4):
+# NOTE: when changing vocab parameter in the rasp_models, the max_val/min_value must reflect that change
+# i.e: vocab = {0, 1, 2, 3, 4, 5, 6} min_value = 0, max_value = 6
+min_val = 0
+max_val= 4
+
+def generate_peak_sequences(n, min_length=3, max_length=9):
     """Generate sequences with various peak patterns"""
     sequences = []
     for _ in range(n):
@@ -13,7 +18,7 @@ def generate_peak_sequences(n, min_length=3, max_length=9, min_val=0, max_val=4)
         sequences.append(sequence)
     return sequences
 
-def generate_alternating_peak_sequences(n, min_length=3, max_length=9, min_val=0, max_val=4):
+def generate_alternating_peak_sequences(n, min_length=3, max_length=9):
     """Generate sequences that alternate between peaks and valleys"""
     sequences = []
     for _ in range(n):
@@ -27,7 +32,7 @@ def generate_alternating_peak_sequences(n, min_length=3, max_length=9, min_val=0
         sequences.append(sequence)
     return sequences
 
-def generate_monotonic_sequences(n, min_length=3, max_length=9, min_val=0, max_val=4):
+def generate_monotonic_sequences(n, min_length=3, max_length=9):
     """Generate increasing or decreasing sequences (no peaks)"""
     sequences = []
     for _ in range(n):
@@ -38,7 +43,7 @@ def generate_monotonic_sequences(n, min_length=3, max_length=9, min_val=0, max_v
         sequences.append(sequence)
     return sequences
 
-def generate_constant_sequences(n, min_length=3, max_length=9, min_val=0, max_val=4):
+def generate_constant_sequences(n, min_length=3, max_length=9):
     """Generate sequences with all same values (no peaks)"""
     sequences = []
     for _ in range(n):
@@ -48,7 +53,8 @@ def generate_constant_sequences(n, min_length=3, max_length=9, min_val=0, max_va
         sequences.append(sequence)
     return sequences
 
-def generate_all_peak_testcases(n):
+"""Generate test cases with different random arrays"""
+def generate_all_peak_testcases(n): 
     all_cases = []
     bos = "BOS"
     if n == 0:

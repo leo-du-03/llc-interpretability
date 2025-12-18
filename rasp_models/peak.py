@@ -1,12 +1,8 @@
 from tracr.rasp import rasp
 from tracr.compiler import compiling
-
 """
-This file contains the code that defines and initializes a RASP model that solves the peak detection task.
-peak: defines the model
-check_peak: initializes the model
+   This algorithm accepts an array of integers and returns an array of booleans that indicate whether each value is a peak (local maximum).
 """
-
 def peak():
     # Getting indicies of L,R neighbors
     left_idx = rasp.indices - 1
@@ -47,13 +43,13 @@ def get_peak_model():
     bos = "BOS"
     model = compiling.compile_rasp_to_model(
         peak(),
-        vocab={0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
-        max_seq_len=10,
+        vocab={0, 1, 2, 3, 4}, # changed when testing different vocab size for LLC (0-4, 0-6, 0-9)
+        max_seq_len=50, # changed when testing different sequence lengths for LLC (10, 50)
         compiler_bos=bos,
     )
     return model
 
-# testing this method locally: 
+# # Testing this method locally: 
 # if __name__ == "__main__":
 #     model = get_peak_model()
     
@@ -68,7 +64,8 @@ def get_peak_model():
 #         ["BOS", 2, 0, 4, 0, 2],      
 #         ["BOS", 2, 0, 0, 4, 0, 0, 2],      
 #         ["BOS", 1, 0, 0, 2, 0, 0, 0],    
-#         ["BOS", 2, 0, 2, 4, 2, 0, 2]  
+#         ["BOS", 2, 0, 2, 4, 2, 0, 2],
+#         ["BOS", 2, 0, 2, 4, 2, 0, 2]
 #     ]
 #     print("Testing Peak Detection:\n")
 #     for seq in test_sequences:
