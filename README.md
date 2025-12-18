@@ -88,7 +88,7 @@ Folder for temporarily storing trained models.
 Contains python scripts to define and instantiate compiled transformers using the RASP language.
 Files:
 - `dominantpeak.py`:  Python script to define and initialize a compiled transformer for the dominant peak detection algorithm (which builds off of the peak detection algorithm).
-- `fractok.py`: Python script to define and initialize a compiled transformer for the fraction of previous tokens algorithm. Tests are contained in `tests/test_fractok.py`.
+- `fractok.py`: Python script to define and initialize a compiled transformer for the fraction of previous tokens algorithm. Contains pipeline to systematically ablate layers from the model and study their affects on LLC. Tests are contained in `tests/test_fractok.py`.
 - `histogram.py`: Python script to define and initialize a compiled transformer for the histogram algorithm.
 - `palindrome.py`: Python script to define and initialize a compiled transformer for the palindrome detection algorithm. Tests are contained in `tests/test_palindrome.py`.
 - `peak.py`: Python script to define and initialize a compiled transformer for the peak detection algorithm. Tests are contained in `tests/test_peak.py`.
@@ -113,5 +113,3 @@ Models created using tracr should maintain a 100% accuracy on tests.
 A modified version of the original tracr codebase.
 Code has been added to convert compiled transformers from JAX to PyTorch. This can be found in `tracr/tracr/haiku_to_pytorch.py`.
 The conversion is tested in `tests/test_haiku_to_pytorch.py`.
-## ablations.ipynb
-Contains pipeline to systematically ablate layers from the model and study their affects on LLC.
