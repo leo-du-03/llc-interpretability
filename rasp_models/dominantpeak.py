@@ -9,7 +9,7 @@ from tracr.compiler import compiling
 """
 
 def dompeak():
-    # 1. This segment of code is all that is code present in peak.py: 
+    # 1. Dominant peak builds on peak (refer to peak.py in rasp_models for further explanation)
     left_idx = rasp.indices - 1
     right_idx = rasp.indices + 1
     
@@ -32,6 +32,7 @@ def dompeak():
     
     is_peak = rasp.SequenceMap(lambda a, b: a and b, gt_left, gt_right)
 
+    # 2. Dominant peak logic
     # Get radius-2 neighbors to find valleys
     left2_idx = rasp.indices - 2
     right2_idx = rasp.indices + 2
@@ -110,13 +111,13 @@ def get_dompeak_model():
     bos = "BOS"
     model = compiling.compile_rasp_to_model(
         dompeak(),
-        vocab={0, 1, 2, 3, 4},
+        vocab={0, 1, 2, 3, 4, 5, 6},
         max_seq_len=10,
         compiler_bos=bos,
     )
     return model
 
-# # testing this method locally: 
+# # Testing this method locally: 
 # if __name__ == "__main__":
 #     model = get_dompeak_model()
     
