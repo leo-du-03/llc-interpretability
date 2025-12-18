@@ -76,7 +76,7 @@ Files:
 - `train_fractok.py`: Python script for training a model on the fraction of previous tokens algorithm and estimating LLC during training
 - `training_utils.py`: Contains useful functions for training, LLC estimation, and performance analysis
 #### llc_training/grokking
-Contains notebooks that use the flow from from Timaeus' grokking demonstration notebook. These notebooks aim to both stabilize LLC during training and investigate if LLC can predict future validation loss.
+Contains notebooks that use the flow from Timaeus' grokking demonstration notebook. These notebooks aim to both stabilize LLC during training and investigate if LLC can predict future validation loss.
 Files:
 - `grokking_fractok.ipynb`: Trains a model on the fraction of previous tokens algorithm.
 - `mod_add.ipynb`: Directly adapted from Timaeus' grokking demonstration notebook. Trains a model on modular addition.
