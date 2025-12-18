@@ -13,6 +13,10 @@ Contains dataloaders that are ready to use out of the box for tasks:
     - Fractok
     - Palindrome
     - Peak & Dominant Peak
+    - Reverse
+    - Sort
+    - Triplets
+    - Histogram
 """
 
 VOCAB = ['BOS'] + list("abcdefghijklmnopqrstuvwxyz")  # include all chars you expect
@@ -44,7 +48,7 @@ def getSequenceDataLoader(sequences):
     # return DataLoader(SequenceDataset(sequences=sequences), collate_fn=tensor_collate, shuffle=True)
     return DataLoader(SequenceDataset(sequences=sequences), batch_size=1, collate_fn=identityCollator, shuffle=True)
 
-def makePalindromeDataLoader(num_per_class):
+def makePalindromeDataLoader(num_per_class=50):
     """
     Creates a dataloader containing data for the palindrome task
     

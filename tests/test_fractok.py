@@ -27,3 +27,6 @@ def fractokTests():
                 f"Got:      {decoded}\n"
             )
     print("\n")
+
+if __name__ == "__main__":
+    fractokTests()

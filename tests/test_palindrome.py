@@ -53,3 +53,6 @@ def palindromesTests():
                 f"Got:      {out.decoded}\n"
             )
     print("\n")
+
+if __name__ == "__main__":
+    palindromesTests()

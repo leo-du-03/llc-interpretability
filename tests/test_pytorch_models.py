@@ -40,3 +40,6 @@ def testLoadingGrokkingPeakModels():
     print(".", end="", flush=True)
     assert(medium_large(testList) != None)
     print(".", end="", flush=True)
+
+if __name__ == "__main__":
+    testLoadingGrokkingPeakModels()

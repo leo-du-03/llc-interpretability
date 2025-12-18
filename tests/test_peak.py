@@ -24,3 +24,6 @@ def peakTests():
                 f"Expected: {expected_output}\n"
                 f"Got:      {decoded}\n"
             )
+
+if __name__ == "__main__":
+    peakTests()
